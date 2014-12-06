@@ -19,8 +19,75 @@ var game = {
 
 	GAMELEVEL: 0,
 
-	MUSIC_ON: true,
+	MUSIC_ON: false,
 	SFX_ON: true,
+	
+	SETTINGS: { 
+		volume: 10, 		// 0 off to 10
+		difficulty: 2, 	 	// 1 easy, 2 medium, 3 hard
+		isMusicOn: false,
+		isSFXOn: true,
+		},
+	
+	MENU: {
+		isDrawn: false,
+		index: 0,
+		Elements: {
+			Resume:		{},
+			Save:  		{},
+			Load:  		{},
+			ToggleMusic:{},
+			ToggleSFX:	{},
+			Volume: 	{},
+			Difficulty: {},
+			Exit: 		{},
+		},
+		Values: {
+			ToggleMusic:{},
+			ToggleSFX:	{},
+			Volume: 	{},
+			Difficulty: {},
+		},
+		
+		// Map must be in the same order, and number of elements as game.MENU.Elements
+		Map: [
+		 // Resume
+		 function() {
+			 if(arguments[0] == "ENTER") {console.log("Resume!");}
+			 },			 
+		 // Save
+		 function() {
+			 if(arguments[0] == "ENTER") {console.log("Save!");}
+			 },			 
+		 // Load
+		 function() { 
+			 if(arguments[0] == "ENTER") {console.log("Load!");}
+			 },			 
+		 // Toggle Music
+		 function() { 
+			 game.SETTINGS.isMusicOn = !game.SETTINGS.isMusicOn;
+			 game.MENU.Values.ToggleMusic.text(game.SETTINGS.isMusicOn);
+		 },		 
+		 // Toggle SFX
+		 function() {
+			 game.SETTINGS.isSFXOn = !game.SETTINGS.isSFXOn;
+			 game.MENU.Values.ToggleSFX.text(game.SETTINGS.isSFXOn);
+		 },
+		 // Volume
+		 function() {
+			if(arguments[0] == "LEFT_ARROW") {if(game.SETTINGS.volume > 0) {game.SETTINGS.volume -= 1;}}
+			else if (arguments[0] == "RIGHT_ARROW") {if(game.SETTINGS.volume < 10) {game.SETTINGS.volume += 1;}}
+			game.MENU.Values.Volume.text(game.SETTINGS.volume);
+		 },	 
+		 // Difficulty
+		 function() { if(arguments[0] == "LEFT_ARROW") {if(game.SETTINGS.difficulty > 1) {game.SETTINGS.difficulty -= 1;}}
+			else if (arguments[0] == "RIGHT_ARROW") {if(game.SETTINGS.difficulty < 3) {game.SETTINGS.difficulty += 1;}}
+			game.MENU.Values.Difficulty.text(game.SETTINGS.difficulty);
+		 },
+		 // Exit
+		 function() { console.log("Exit!");},
+		],
+	},
 
 	CHARLEVELS: [
 		{ level: 0, xp_treshold: 0, max_health: 5, max_mana: 0 },
@@ -50,11 +117,6 @@ var game = {
 		DemonLordBlack: { maxHealth: 100, maxMana: 100, dmg: 15, def: 10, xp: 100, aggroRange: 2, speed: 1 },
 		Wolf: { maxHealth: 20, maxMana: 20, dmg: 15, def: 0, xp: 20, aggroRange: 4, speed: 1 },
 	},
-
-	SETTINGS: {
-		volume: 10, // 0 off to 10
-		difficulty: 2, // 1 easy, 2 medium, 3 hard
-	}
 
 	PLAYER: false, // player not initialized
 
@@ -108,6 +170,123 @@ var game = {
 
 		Crafty.e('2D, DOM, Text').text('M').textColor('#9D9D9D').css({'family': game.GAME_FONT, 'font-size':'15px'}).attr({ x: 948, y: 39, w: 50});
 	},
+	
+	// Menu Listener for key ESC
+	initialiseMenuListener: function () 
+	{	
+			Crafty.e("2D, DOM, Keyboard")
+			.bind('KeyDown', function(evt) 
+			{
+				if (evt.key == Crafty.keys["ESC"])
+				{
+					game.MENU.index = 0;
+					game.showMenu();
+				}
+				else if(game.MENU.isDrawn == true && evt.key == Crafty.keys["UP_ARROW"])
+				{
+						game.manageMenu("UP_ARROW");
+				}
+				else if(game.MENU.isDrawn == true && evt.key == Crafty.keys["DOWN_ARROW"])
+				{
+						game.manageMenu("DOWN_ARROW");
+				}
+				else if(game.MENU.isDrawn == true && evt.key == Crafty.keys["RIGHT_ARROW"])
+				{
+						game.manageMenu("RIGHT_ARROW");
+				}
+				else if(game.MENU.isDrawn == true && evt.key == Crafty.keys["LEFT_ARROW"])
+				{
+						game.manageMenu("LEFT_ARROW");
+				}
+				else if(game.MENU.isDrawn == true && evt.key == Crafty.keys["ENTER"])
+				{
+						game.manageMenu("ENTER");
+				}
+			});
+	},
+	
+	// Responsible for drawing and destroying the Menu
+	showMenu: function () {		
+		// If the Menu is NOT on the screen, isDrawn is false and so the Menu will be DRAWN on the screen
+		if(game.MENU.isDrawn == false)
+		{
+			// 1. Column
+			game.MENU.Elements.Resume = Crafty.e('2D, DOM, Text').text('Resume').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 150, w: 50});
+			game.MENU.Elements.Save = Crafty.e('2D, DOM, Text').text('Save').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 200, w: 50});
+			game.MENU.Elements.Load = Crafty.e('2D, DOM, Text').text('Load').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 250, w: 50});
+			game.MENU.Elements.ToggleMusic = Crafty.e('2D, DOM, Text').text('Music').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 300, w: 50});
+			game.MENU.Elements.ToggleSFX = Crafty.e('2D, DOM, Text').text('SFX').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 350, w: 50});
+			game.MENU.Elements.Volume = Crafty.e('2D, DOM, Text').text('Volume').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 400, w: 50});
+			game.MENU.Elements.Difficulty = Crafty.e('2D, DOM, Text').text('Difficulty').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 450, w: 50});
+			game.MENU.Elements.Exit = Crafty.e('2D, DOM, Text').text('Exit').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 500, w: 50});
+			
+			// 2. Column
+			game.MENU.Values.ToggleMusic = Crafty.e('2D, DOM, Text').text(game.MUSIC_ON).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 300, w: 50});
+			game.MENU.Values.ToggleSFX = Crafty.e('2D, DOM, Text').text(game.SFX_ON).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 350, w: 50});
+			game.MENU.Values.Volume = Crafty.e('2D, DOM, Text').text(game.SETTINGS.volume).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 400, w: 50});
+			game.MENU.Values.Difficulty = Crafty.e('2D, DOM, Text').text(game.SETTINGS.difficulty).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 450, w: 50});
+			
+			// Draw a border around the first Menu Element to mark it as 'active'
+			game.MENU.Elements.Resume.css({'family': game.GAME_FONT, 'font-size':'30px', 'border-style': 'solid'});
+			
+			game.MENU.isDrawn = true;
+
+
+		}
+		// If the Menu IS on the screen, isDrawn is true and so the Menu will be DESTROYED
+		else
+		{
+			// 1. Column
+			game.MENU.Elements.Resume.destroy();
+			game.MENU.Elements.Save.destroy();
+			game.MENU.Elements.Load.destroy();
+			game.MENU.Elements.ToggleMusic.destroy();
+			game.MENU.Elements.ToggleSFX.destroy();
+			game.MENU.Elements.Volume.destroy();
+			game.MENU.Elements.Difficulty.destroy();
+			game.MENU.Elements.Exit.destroy();
+			
+			// 2. Column
+			game.MENU.Values.ToggleMusic.destroy();
+			game.MENU.Values.ToggleSFX.destroy();
+			game.MENU.Values.Volume.destroy();
+			game.MENU.Values.Difficulty.destroy();
+			
+			game.MENU.isDrawn = false;
+		}
+	},
+	
+	// Marks Menu Elements as active, game.MENU.index indicates the active Element
+	manageMenu: function () {
+		
+		var keys = Object.keys(game.MENU.Elements);	
+		var length = Object.keys(game.MENU.Elements).length-1;
+		if(arguments[0] == "DOWN_ARROW")
+		{
+			game.MENU.Elements[keys[game.MENU.index++]].css({'family': game.GAME_FONT, 'font-size':'30px', 'border-style': 'none'});
+			if(	game.MENU.index > length) { game.MENU.index = 0;}
+			game.MENU.Elements[keys[game.MENU.index]].css({'family': game.GAME_FONT, 'font-size':'30px', 'border-style': 'solid'});
+		}
+		else if(arguments[0] == "UP_ARROW")
+		{
+			game.MENU.Elements[keys[game.MENU.index--]].css({'family': game.GAME_FONT, 'font-size':'30px', 'border-style': 'none'});
+			if(	game.MENU.index < 0) { game.MENU.index = length;}
+			game.MENU.Elements[keys[game.MENU.index]].css({'family': game.GAME_FONT, 'font-size':'30px', 'border-style': 'solid'});
+		}
+		else if(arguments[0] == "RIGHT_ARROW")
+		{
+			game.MENU.Map[game.MENU.index]("RIGHT_ARROW");
+		}
+		else if(arguments[0] == "LEFT_ARROW")
+		{
+			game.MENU.Map[game.MENU.index]("LEFT_ARROW");
+		}
+		else if(arguments[0] == "ENTER")
+		{
+			game.MENU.Map[game.MENU.index]("ENTER");
+		}
+	},
+
 
 	clear_area: function (begin, end, debug) {
 		for (var x = begin.x; x <= end.x; x++) {
