@@ -19,19 +19,19 @@ var game = {
 
 	GAMELEVEL: 0,
 
-	MUSIC_ON: false,
-	SFX_ON: true,
-	
 	SETTINGS: { 
 		volume: 10, 		// 0 off to 10
 		difficulty: 2, 	 	// 1 easy, 2 medium, 3 hard
 		isMusicOn: false,
 		isSFXOn: true,
+		sfxImage: {},
+		musicImage: {},
 		},
 	
 	MENU: {
 		isDrawn: false,
 		index: 0,
+		Background: {},
 		Elements: {
 			Resume:		{},
 			Save:  		{},
@@ -53,7 +53,11 @@ var game = {
 		Map: [
 		 // Resume
 		 function() {
-			 if(arguments[0] == "ENTER") {console.log("Resume!");}
+			 if(arguments[0] == "ENTER") {
+				game.MENU.index = 0;
+				game.showMenu();
+
+			 }
 			 },			 
 		 // Save
 		 function() {
@@ -65,13 +69,18 @@ var game = {
 			 },			 
 		 // Toggle Music
 		 function() { 
-			 game.SETTINGS.isMusicOn = !game.SETTINGS.isMusicOn;
-			 game.MENU.Values.ToggleMusic.text(game.SETTINGS.isMusicOn);
+			game.SETTINGS.isMusicOn = !game.SETTINGS.isMusicOn;
+	 		var musicImagePath = (game.SETTINGS.isMusicOn == true) ? './assets/images/music_on.png' : './assets/images/music_off.png';
+			game.SETTINGS.musicImage.image(musicImagePath);
+			game.MENU.Values.ToggleMusic.text(game.SETTINGS.isMusicOn);
+			if (game.SETTINGS.isMusicOn) { Crafty.audio.unpause('thevillage'); } else {Crafty.audio.pause('thevillage'); }
 		 },		 
 		 // Toggle SFX
 		 function() {
-			 game.SETTINGS.isSFXOn = !game.SETTINGS.isSFXOn;
-			 game.MENU.Values.ToggleSFX.text(game.SETTINGS.isSFXOn);
+			game.SETTINGS.isSFXOn = !game.SETTINGS.isSFXOn;
+	 		var sfxImagePath = (game.SETTINGS.isSFXOn == true) ? './assets/images/sound_on.png' : './assets/images/sound_off.png';
+			game.SETTINGS.sfxImage.image(sfxImagePath);
+			game.MENU.Values.ToggleSFX.text(game.SETTINGS.isSFXOn);
 		 },
 		 // Volume
 		 function() {
@@ -85,7 +94,10 @@ var game = {
 			game.MENU.Values.Difficulty.text(game.SETTINGS.difficulty);
 		 },
 		 // Exit
-		 function() { console.log("Exit!");},
+		 function() { 
+		 	game.MENU.isDrawn = false;
+			Crafty.scene('GameOver'); 
+		},
 		],
 	},
 
@@ -132,38 +144,38 @@ var game = {
 
 	// TODO: this was only for testing purposes, to be completed
 	drawSoundButtons: function () {
-		var sfxImagePath = (game.SFX_ON == true) ? './assets/images/sound_on.png' : './assets/images/sound_off.png';
-		var sfxImage = Crafty.e("2D, DOM, Image, Keyboard")
+		var sfxImagePath = (game.SETTINGS.isSFXOn == true) ? './assets/images/sound_on.png' : './assets/images/sound_off.png';
+		game.SETTINGS.sfxImage = Crafty.e("2D, DOM, Image, Keyboard")
 			.image(sfxImagePath)
 			.attr({x: (game.GRID_WIDTH-1)*game.TILE_WIDTH-2, y: 2, h: 32, w: 32, z:10})
 			.bind('KeyDown', function(evt) {
 				if (evt.key == Crafty.keys["N"]) {
-					if (game.SFX_ON == true) {
-						game.SFX_ON = false;
-						sfxImage.image("./assets/images/sound_off.png");
+					if (game.SETTINGS.isSFXOn == true) {
+						game.SETTINGS.isSFXOn = false;
+						game.SETTINGS.sfxImage.image("./assets/images/sound_off.png");
 					} else {
-						sfxImage.image("./assets/images/sound_on.png");
-						game.SFX_ON = true;
+						game.SETTINGS.sfxImage.image("./assets/images/sound_on.png");
+						game.SETTINGS.isSFXOn = true;
 					}
 				}
 			});
 
 		Crafty.e('2D, DOM, Text').text('N').textColor('#9D9D9D').css({'family': game.GAME_FONT, 'font-size':'15px'}).attr({ x: 948, y: 11, w: 50});
 
-		var musicImagePath = (game.MUSIC_ON == true) ? './assets/images/music_on.png' : './assets/images/music_off.png';
-		var musicImage = Crafty.e("2D, DOM, Image, Keyboard")
+		var musicImagePath = (game.SETTINGS.isMusicOn == true) ? './assets/images/music_on.png' : './assets/images/music_off.png';
+		game.SETTINGS.musicImage = Crafty.e("2D, DOM, Image, Keyboard")
 			.image(musicImagePath)
 			.attr({x: (game.GRID_WIDTH-1)*game.TILE_WIDTH-2, y: 30, h: 32, w: 32, z:10})
 			.bind('KeyDown', function(evt) {
 				if (evt.key == Crafty.keys["M"]) {
-					if (game.MUSIC_ON == true) {
-						game.MUSIC_ON = false;
+					if (game.SETTINGS.isMusicOn == true) {
+						game.SETTINGS.isMusicOn = false;
 						Crafty.audio.pause('thevillage');
-						musicImage.image("./assets/images/music_off.png");
+						game.SETTINGS.musicImage.image("./assets/images/music_off.png");
 					} else {
-						musicImage.image("./assets/images/music_on.png");
+						game.SETTINGS.musicImage.image("./assets/images/music_on.png");
 						Crafty.audio.unpause('thevillage');
-						game.MUSIC_ON = true;
+						game.SETTINGS.isMusicOn = true;
 					}
 				}
 			});
@@ -198,7 +210,7 @@ var game = {
 				{
 						game.manageMenu("LEFT_ARROW");
 				}
-				else if(game.MENU.isDrawn == true && evt.key == Crafty.keys["ENTER"])
+				else if(game.MENU.isDrawn == true && (evt.key == Crafty.keys["ENTER"] || evt.key == Crafty.keys["SPACE"]))
 				{
 						game.manageMenu("ENTER");
 				}
@@ -210,19 +222,21 @@ var game = {
 		// If the Menu is NOT on the screen, isDrawn is false and so the Menu will be DRAWN on the screen
 		if(game.MENU.isDrawn == false)
 		{
+			// background
+			game.MENU.Background = Crafty.e('2D, DOM').css({'background':'rgb(12,49,19)', 'border': '4px solid rgb(6, 25, 10)'}).attr({ x: 150, y: 100, w: 550, h: 480});
 			// 1. Column
-			game.MENU.Elements.Resume = Crafty.e('2D, DOM, Text').text('Resume').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 150, w: 50});
-			game.MENU.Elements.Save = Crafty.e('2D, DOM, Text').text('Save').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 200, w: 50});
-			game.MENU.Elements.Load = Crafty.e('2D, DOM, Text').text('Load').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 250, w: 50});
-			game.MENU.Elements.ToggleMusic = Crafty.e('2D, DOM, Text').text('Music').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 300, w: 50});
-			game.MENU.Elements.ToggleSFX = Crafty.e('2D, DOM, Text').text('SFX').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 350, w: 50});
-			game.MENU.Elements.Volume = Crafty.e('2D, DOM, Text').text('Volume').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 400, w: 50});
-			game.MENU.Elements.Difficulty = Crafty.e('2D, DOM, Text').text('Difficulty').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 450, w: 50});
-			game.MENU.Elements.Exit = Crafty.e('2D, DOM, Text').text('Exit').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 500, w: 50});
+			game.MENU.Elements.Resume = Crafty.e('2D, DOM, Text').text('Resume').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 150, w: 180});
+			game.MENU.Elements.Save = Crafty.e('2D, DOM, Text').text('Save').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 200, w: 180});
+			game.MENU.Elements.Load = Crafty.e('2D, DOM, Text').text('Load').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 250, w: 180});
+			game.MENU.Elements.ToggleMusic = Crafty.e('2D, DOM, Text').text('Music').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 300, w: 180});
+			game.MENU.Elements.ToggleSFX = Crafty.e('2D, DOM, Text').text('SFX').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 350, w: 180});
+			game.MENU.Elements.Volume = Crafty.e('2D, DOM, Text').text('Volume').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 400, w: 180});
+			game.MENU.Elements.Difficulty = Crafty.e('2D, DOM, Text').text('Difficulty').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 450, w: 180});
+			game.MENU.Elements.Exit = Crafty.e('2D, DOM, Text').text('Exit').textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 250, y: 500, w: 180});
 			
 			// 2. Column
-			game.MENU.Values.ToggleMusic = Crafty.e('2D, DOM, Text').text(game.MUSIC_ON).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 300, w: 50});
-			game.MENU.Values.ToggleSFX = Crafty.e('2D, DOM, Text').text(game.SFX_ON).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 350, w: 50});
+			game.MENU.Values.ToggleMusic = Crafty.e('2D, DOM, Text').text(game.SETTINGS.isMusicOn).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 300, w: 50});
+			game.MENU.Values.ToggleSFX = Crafty.e('2D, DOM, Text').text(game.SETTINGS.isSFXOn).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 350, w: 50});
 			game.MENU.Values.Volume = Crafty.e('2D, DOM, Text').text(game.SETTINGS.volume).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 400, w: 50});
 			game.MENU.Values.Difficulty = Crafty.e('2D, DOM, Text').text(game.SETTINGS.difficulty).textColor('#000000').css({'family': game.GAME_FONT, 'font-size':'30px'}).attr({ x: 550, y: 450, w: 50});
 			
@@ -236,6 +250,8 @@ var game = {
 		// If the Menu IS on the screen, isDrawn is true and so the Menu will be DESTROYED
 		else
 		{
+			// Background
+			game.MENU.Background.destroy();
 			// 1. Column
 			game.MENU.Elements.Resume.destroy();
 			game.MENU.Elements.Save.destroy();

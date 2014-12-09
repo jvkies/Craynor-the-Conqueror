@@ -312,7 +312,7 @@ Crafty.c('Mob', {
 		    }
 		}
 
-	    if (game.SFX_ON) { Crafty.audio.play(hitSound); }
+	    if (game.SETTINGS.isSFXOn) { Crafty.audio.play(hitSound); }
 
 	    // Crafty.e('FloatingText').FloatingText(fighters.attacker.x+8, fighters.attacker.y-4, dmgTaken.toString(), '#562807', 25, {w:32, h:32}, "20px");
 
@@ -338,7 +338,7 @@ Crafty.c('Mob', {
 
 
   //       if (dmgTaken <= 0) {
-		//     if (game.SFX_ON) { Crafty.audio.play('nohit'); }
+		//     if (game.SETTINGS.isSFXOn) { Crafty.audio.play('nohit'); }
   //       } else {
 		// 	if (revengeAttack) {
 		// 		if (fighters.attacker.health <= 0) {
@@ -353,7 +353,7 @@ Crafty.c('Mob', {
 		// 	} else {
 		//         var hitSound = (Math.random() > 0.66) ? 'swing1' : (Math.random() > 0.66) ? 'swing2' : 'swing3';
 		// 	}
-		// 	if (game.SFX_ON) { Crafty.audio.play(hitSound); }
+		// 	if (game.SETTINGS.isSFXOn) { Crafty.audio.play(hitSound); }
   //       }
 	 //    // Crafty.e('SlashEffect').showSlash(fighters.victim.x,fighters.victim.y);
 
@@ -368,7 +368,7 @@ Crafty.c('Mob', {
 		// 			game.GRID[fighters.victim.grid_x][fighters.victim.grid_y] = Crafty.e(loot_type).at(fighters.victim.grid_x,fighters.victim.grid_y);
 		// 		}
 		// 		this.giveXP(fighters.attacker, fighters.victim.XP);
-		// 	    if (game.SFX_ON) { Crafty.audio.play('destruction'); }
+		// 	    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('destruction'); }
 		// 	} else {
 		// 		// var thisMob = this;
 		// 	 //  	setTimeout(function() {
@@ -406,7 +406,7 @@ Crafty.c('Mob', {
 			$('#charHPValue').text(whom.maxHealth);
 			$('#charCurrentXP').css("height", "0%");
 			console.log("level up");
-			if (game.SFX_ON) { Crafty.audio.play('levelup'); }
+			if (game.SETTINGS.isSFXOn) { Crafty.audio.play('levelup'); }
 		};
 	},
 
@@ -524,44 +524,45 @@ Crafty.c('PlayerCharacter', {
 			}
 		})
 		.bind('KeyPressed', function(evt) {
-			if (!this.moving) {
+			if (!this.moving && !game.MENU.isDrawn) {
 				this.checkForMovement(evt, this);
 			}
 		})
 
+		.onHit('Village', this.visitVillage)
 
-      // .stopOnSolids()
-      .onHit('Village', this.visitVillage)
-      // These next lines define our four animations
-      //  each call to .animate specifies:
-      //  - the name of the animation
-      //  - the x and y coordinates within the sprite
-      //     map at which the animation set begins
-      //  - the number of animation frames *in addition to* the first one
+		// These next lines define our four animations
+		//  each call to .animate specifies:
+		//  - the name of the animation
+		//  - the x and y coordinates within the sprite
+		//     map at which the animation set begins
+		//  - the number of animation frames *in addition to* the first one
 
-      .animate('PlayerMovingUp',    0, 0, 2)
-      .animate('PlayerMovingRight', 0, 1, 2)
-      .animate('PlayerMovingDown',  0, 2, 2)
-      .animate('PlayerMovingLeft',  0, 3, 2)
-      .animate('PlayerLookUp',    0, 0, 0)
-      .animate('PlayerLookRight', 0, 1, 0)
-      .animate('PlayerLookDown',  0, 2, 0)
-      .animate('PlayerLookLeft',  0, 3, 0);
-  	this.isPlayer = true;
+		.animate('PlayerMovingUp',    0, 0, 2)
+		.animate('PlayerMovingRight', 0, 1, 2)
+		.animate('PlayerMovingDown',  0, 2, 2)
+		.animate('PlayerMovingLeft',  0, 3, 2)
+		.animate('PlayerLookUp',    0, 0, 0)
+		.animate('PlayerLookRight', 0, 1, 0)
+		.animate('PlayerLookDown',  0, 2, 0)
+		.animate('PlayerLookLeft',  0, 3, 0);
+		this.isPlayer = true;
  
 		var animation_speed = 4;
 		this.bind('NewDirection', function (evt) {
-			if (evt.key == Crafty.keys["A"]) {
-		        this.animate('PlayerLookLeft', animation_speed, -1);
-			} else if (evt.key == Crafty.keys["D"]) {
-		        this.animate('PlayerLookRight', animation_speed, -1);
+			if (!game.MENU.isDrawn) {
+				if (evt.key == Crafty.keys["A"]) {
+			        this.animate('PlayerLookLeft', animation_speed, -1);
+				} else if (evt.key == Crafty.keys["D"]) {
+			        this.animate('PlayerLookRight', animation_speed, -1);
 
-			} else if (evt.key == Crafty.keys["W"] || evt.key == Crafty.keys["Q"] || evt.key == Crafty.keys["E"]) {
-		        this.animate('PlayerLookUp', animation_speed, -1);
+				} else if (evt.key == Crafty.keys["W"] || evt.key == Crafty.keys["Q"] || evt.key == Crafty.keys["E"]) {
+			        this.animate('PlayerLookUp', animation_speed, -1);
 
-			} else if (evt.key == Crafty.keys["S"] || evt.key == Crafty.keys["Y"] || evt.key == Crafty.keys["C"]) {
-		        this.animate('PlayerLookDown', animation_speed, -1);
-			}
+				} else if (evt.key == Crafty.keys["S"] || evt.key == Crafty.keys["Y"] || evt.key == Crafty.keys["C"]) {
+			        this.animate('PlayerLookDown', animation_speed, -1);
+				}
+			} 
 		})
   },
 
@@ -617,7 +618,7 @@ Crafty.c('PlayerCharacter', {
 			player.moving = true;
 		  	setTimeout(function() {
 					player.moving = false;
-		  	}, 100); 
+		  	}, 120); 
 		};
 	},
  
@@ -640,14 +641,14 @@ Crafty.c('PlayerCharacter', {
 					console.log('found sword');
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].destroy();
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] = undefined;
-				    if (game.SFX_ON) { Crafty.audio.play('loot_sword'); }
+				    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('loot_sword'); }
 				} else if (game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].__c.loot_armor_1 == true) {
 					game.PLAYER.def += 1;
 					$('#charDef').text(game.PLAYER.def);
 					console.log('found armor');
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].destroy();
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] = undefined;
-				    if (game.SFX_ON) { Crafty.audio.play('loot_armor'); }
+				    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('loot_armor'); }
 				}
 			}
 			this.moveMob(movement);
@@ -684,7 +685,7 @@ Crafty.c('Village', {
   // Process a visitation with this village
   visit: function() {
     this.destroy();
-    if (game.SFX_ON) { Crafty.audio.play('destruction'); }
+    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('destruction'); }
     Crafty.trigger('VillageVisited', this);
   }
 });

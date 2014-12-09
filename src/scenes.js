@@ -7,9 +7,10 @@ Crafty.scene('Game', function() {
 
  	$('#divGUI').show();
 	game.drawSoundButtons();
+	game.initialiseMenuListener();
 	var stagelevel = Crafty.e('2D, DOM, Text, Color').text("Stage: "+game.GAMELEVEL).textColor('#9D9D9D').attr({ x: 748, y: 29, w: 200}).css({'family': game.GAME_FONT, 'font-size':'20px'});
 
-	if (game.MUSIC_ON) { Crafty.audio.play('thevillage'); }
+	if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
 
 	var stage_taser = Crafty.e('2D, DOM, Text, Color, Tween').text("Stage: "+game.GAMELEVEL).textColor('#5A1E00').attr({ x: (game.TILE_WIDTH*game.GRID_WIDTH)/2-100, y: game.TILE_HEIGHT*game.GRID_HEIGHT/2, w: 250, alpha: 0}).css({'family': "Impact", 'font-size':'40px'});
 	stage_taser.tween({ alpha: 1}, 20);
@@ -92,7 +93,7 @@ Crafty.scene('Game', function() {
 
 
   // Play a ringing sound to indicate the start of the journey
-  if (game.SFX_ON) { Crafty.audio.play('newgame'); }
+  if (game.SETTINGS.isSFXOn) { Crafty.audio.play('newgame'); }
 
   // Show the victory screen once all villages are visisted
   this.show_victory = this.bind('VillageVisited', function() {
@@ -128,7 +129,7 @@ Crafty.scene('Game', function() {
 // Tells the player when they've won and lets them start a new game
 Crafty.scene('GameOver', function() {
 	// Display some text in celebration of the victory
-	if (game.SFX_ON) { Crafty.audio.play('gameover'); }
+	if (game.SETTINGS.isSFXOn) { Crafty.audio.play('gameover'); }
 	Crafty.audio.stop('thevillage');
 
 	for (var x = 0; x < game.GRID_WIDTH; x++) {
@@ -165,12 +166,14 @@ Crafty.scene('GameOver', function() {
 	}, 2000);
 
 	game.PLAYER = false;
+	game.MOBS_KILLED = 0;
+	game.DMG_DEALT = 0;
 	game.GAMELEVEL = 0;
 
 	this.restart_game = Crafty.bind('KeyDown', function() {
 		if (!delay) {
 			Crafty.scene('Game');
-			if (game.MUSIC_ON) { Crafty.audio.play('thevillage'); }
+			if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
 	    }
 	});
 }, function() {
@@ -204,7 +207,7 @@ Crafty.scene('Victory', function() {
 		// .css({'font-size':'45px'});
  
 	// Give'em a round of applause!
-	if (game.SFX_ON) { Crafty.audio.play('winning'); }
+	if (game.SETTINGS.isSFXOn) { Crafty.audio.play('winning'); }
  
 	// After a short delay, watch for the player to press a key, then restart
 	// the game when a key is pressed
@@ -220,7 +223,7 @@ Crafty.scene('Victory', function() {
 	this.restart_game = Crafty.bind('KeyDown', function() {
 		if (!delay) {
 			Crafty.scene('Game');
-			if (game.MUSIC_ON) { Crafty.audio.play('thevillage'); }
+			if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
 	    }
 	});
 }, function() {
@@ -378,7 +381,7 @@ Crafty.scene('Loading', function(){
 
 	this.restart_game = Crafty.bind('KeyDown', function() {
 		Crafty.scene('Game');
-		if (game.MUSIC_ON) { Crafty.audio.play('thevillage'); }
+		if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
 
 
   });
