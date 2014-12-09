@@ -182,6 +182,36 @@ var game = {
 
 		Crafty.e('2D, DOM, Text').text('M').textColor('#9D9D9D').css({'family': game.GAME_FONT, 'font-size':'15px'}).attr({ x: 948, y: 39, w: 50});
 	},
+    
+    // Calculates the distance between two 2D points
+    vectorDistance: function (playerX, playerY, mobX, mobY)
+        {
+            var x = playerX-mobX;
+            var y = playerY-mobY;
+            return Math.sqrt(x*x+y*y);
+        },
+    
+    // Returns an Array with Objects, sorted ascending by the distance between the player and possible movement tiles of a monster
+    // Array should always contain 9 Objects
+    // First coordinates: array[0].x; array[0].y;
+    // Last coordinates: array[array.length() -1].x; array[array.length() -1].y;
+    calculateDistanceArray: function (playerX, playerY, mobX, mobY)
+    {
+        var distanceArray = [];
+        var m = 0;
+        for(var i = -1; i <= 1; i++)
+        {
+            for(var j = -1; j <= 1; j++)
+            {
+                //if(!(i == 0 && j == 0))
+                distanceArray[m++] = {x:mobX+j, y:mobY+i, distance: game.vectorDistance(playerX, playerY, mobX+j, mobY+i)};
+
+            }
+        }
+        distanceArray.sort(function(a, b){return a.distance-b.distance})
+        console.log(distanceArray);
+        return distanceArray;
+    },
 	
 	// Menu Listener for key ESC
 	initialiseMenuListener: function () 
