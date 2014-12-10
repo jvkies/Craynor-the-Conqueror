@@ -334,68 +334,6 @@ Crafty.c('Mob', {
 	    // Crafty.e('SlashEffect').showSlash(fighters.victim.x,fighters.victim.y);
 	},
 		
-		// 	meleeAttack: function (fighters, revengeAttack) {
-		// if (revengeAttack) {
-		// 	dmgTaken = this.calcDmg(fighters.victim.dmg, fighters.attacker.def);
-		// 	if (fighters.attacker.health-dmgTaken < 0) {
-		// 		fighters.attacker.health = 0;
-		// 	} else {
-		// 		fighters.attacker.health -= dmgTaken;
-		// 	}
-		// 	$('#charCurrentHP').css("height", fighters.attacker.health/fighters.attacker.maxHealth*100+"%");
-		// 	$('#charHPValue').text(fighters.attacker.health);
-		//     Crafty.e('FloatingText').FloatingText(fighters.attacker.x+8, fighters.attacker.y-4, dmgTaken.toString(), '#562807', 25, {w:32, h:32}, "20px");
-		// } else {
-		// 	dmgTaken = this.calcDmg(fighters.attacker.dmg, fighters.victim.def);
-		// 	fighters.victim.health -= dmgTaken;
-		//     Crafty.e('FloatingText').FloatingText(fighters.victim.x+8, fighters.victim.y-4, dmgTaken.toString(), '#562807', 25, {w:32, h:32}, "20px");
-		// }
-
-
-  //       if (dmgTaken <= 0) {
-		//     if (game.SETTINGS.isSFXOn) { Crafty.audio.play('nohit'); }
-  //       } else {
-		// 	if (revengeAttack) {
-		// 		if (fighters.attacker.health <= 0) {
-		// 			var hitSound = 'death';
-		// 			game.PLAYER.destroy();
-		// 			setTimeout(function () {
-		// 				Crafty.scene('GameOver');
-		// 			}, 2000);
-		// 		} else {
-		// 	        var hitSound = (Math.random() > 0.66) ? 'pain1' : (Math.random() > 0.66) ? 'pain2' : 'pain5';
-		// 		}
-		// 	} else {
-		//         var hitSound = (Math.random() > 0.66) ? 'swing1' : (Math.random() > 0.66) ? 'swing2' : 'swing3';
-		// 	}
-		// 	if (game.SETTINGS.isSFXOn) { Crafty.audio.play(hitSound); }
-  //       }
-	 //    // Crafty.e('SlashEffect').showSlash(fighters.victim.x,fighters.victim.y);
-
-		// if (!revengeAttack) {
-		// 	if (fighters.victim.health <= 0) {
-		// 		console.log('monster destroyed');
-		// 		fighters.victim.destroy();
-		// 		game.GRID[fighters.victim.grid_x][fighters.victim.grid_y] = undefined;
-		// 		if (Math.random() < 0.08) {
-		// 			// yay loot!
-		// 			var loot_type = (Math.random() < 0.8) ? 'loot_sword_1' : 'loot_armor_1';
-		// 			game.GRID[fighters.victim.grid_x][fighters.victim.grid_y] = Crafty.e(loot_type).at(fighters.victim.grid_x,fighters.victim.grid_y);
-		// 		}
-		// 		this.giveXP(fighters.attacker, fighters.victim.XP);
-		// 	    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('destruction'); }
-		// 	} else {
-		// 		// var thisMob = this;
-		// 	 //  	setTimeout(function() {
-		// 		// 	console.log('revenge Attack! '+fighters.victim.health);
-		// 		// 	thisMob.meleeAttack(fighters, true);
-		// 	 //  	}, 80); 
-		// 	}
-
-		// };
-
-	// },
-
 	calcDmg: function (dmg, def) {
 		var afterHit = dmg-def;
 		if (afterHit <= 0) {
@@ -428,6 +366,7 @@ Crafty.c('Mob', {
 	moveMob: function(movement) {
 		// console.log("moving mob "+this);
 		var animation_speed = 1;
+		var smoothAnimation = false;
 		mob = this;
 
 		game.GRID[this.grid_x][this.grid_y] = undefined;
@@ -435,62 +374,89 @@ Crafty.c('Mob', {
 		mob.grid_y += movement.y;
 		game.GRID[this.grid_x][this.grid_y] = mob;
 		// This animates the movement from one single tile to another, this needs improvement TODO
-		// if (movement.x > 0 && this.isPlayer ) {
-		//     // this.animate('PlayerLookRight', animation_speed, -1);
-	 //        mob.animate('PlayerMovingRight', animation_speed, 1);
+		if (smoothAnimation) {
+			if (movement.x > 0 ) {
+				if (movement.y < 0) {
+			        if (this.isPlayer) { mob.animate('PlayerMovingUp', animation_speed, 1); }
 
-		// 	mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.25*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
-		// 	setTimeout(function() {
-		// 		setTimeout(function() {
-		// 			setTimeout(function() {
-		// 				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
-		// 		  	}, 40); 
-		// 			mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.75*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
-		// 	  	}, 40); 
-		// 	mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.5*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
-		//   	}, 40); 
-		// } else if (movement.x < 0 && this.isPlayer) {
-	 //        mob.animate('PlayerMovingLeft', animation_speed, 1);
-		// 	mob.attr({ x: (mob.grid_x+1) * game.TILE_WIDTH-(0.25*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
-		// 	setTimeout(function() {
-		// 		setTimeout(function() {
-		// 			setTimeout(function() {
-		// 				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
-		// 		  	}, 40); 
-		// 			mob.attr({ x: (mob.grid_x+1) * game.TILE_WIDTH-(0.75*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
-		// 	  	}, 40); 
-		// 	mob.attr({ x: (mob.grid_x+1) * game.TILE_WIDTH-(0.5*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
-		//   	}, 40); 
+					mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.25*game.TILE_WIDTH) , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.25*game.TILE_HEIGHT) });
+					setTimeout(function() {
+						setTimeout(function() {
+							setTimeout(function() {
+								mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+						  	}, 30); 
+							mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.75*game.TILE_WIDTH) , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.75*game.TILE_HEIGHT) });
+					  	}, 30); 
+					mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.5*game.TILE_WIDTH) , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.5*game.TILE_HEIGHT)  });
+				  	}, 30); 
 
-		// } else if (movement.y > 0 && this.isPlayer) {
-	 //        mob.animate('PlayerMovingDown', animation_speed, 1);
-		// 	mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y-1) * game.TILE_HEIGHT+(0.25*game.TILE_HEIGHT) });
-		// 	setTimeout(function() {
-		// 		setTimeout(function() {
-		// 			setTimeout(function() {
-		// 				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
-		// 		  	}, 40); 
-		// 			mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y-1) * game.TILE_HEIGHT+(0.75*game.TILE_HEIGHT) });
-		// 	  	}, 40); 
-		// 	mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y-1) * game.TILE_HEIGHT+(0.5*game.TILE_HEIGHT) });
-		//   	}, 40); 
-		// } else if (movement.y < 0 && this.isPlayer) {
-	 //        mob.animate('PlayerMovingUp', animation_speed, 1);
-		// 	mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.25*game.TILE_HEIGHT) });
-		// 	setTimeout(function() {
-		// 		setTimeout(function() {
-		// 			setTimeout(function() {
-		// 				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
-		// 		  	}, 40); 
-		// 			mob.attr({ x: mob.grid_x * game.TILE_WIDTH , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.75*game.TILE_HEIGHT) });
-		// 	  	}, 40); 
-		// 	mob.attr({ x: mob.grid_x * game.TILE_WIDTH , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.5*game.TILE_HEIGHT) });
-		//   	}, 40); 
-		// } else {
-		// 	console.log("moving mob");
+
+				} else {
+
+				    // this.animate('PlayerLookRight', animation_speed, -1);
+					if (this.isPlayer) { mob.animate('PlayerMovingRight', animation_speed, 1); }
+
+					mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.25*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
+					setTimeout(function() {
+						setTimeout(function() {
+							setTimeout(function() {
+								mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+						  	}, 30); 
+							mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.75*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
+					  	}, 30); 
+					mob.attr({ x: (mob.grid_x-1) * game.TILE_WIDTH+(0.5*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
+				  	}, 30); 
+				}
+			} else if (movement.x < 0) {
+		        // mob.animate('PlayerMovingLeft', animation_speed, 1);
+				if (this.isPlayer) { mob.animate('PlayerMovingLeft', animation_speed, 1); }
+				mob.attr({ x: (mob.grid_x+1) * game.TILE_WIDTH-(0.25*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
+				setTimeout(function() {
+					setTimeout(function() {
+						setTimeout(function() {
+							mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+					  	}, 30); 
+						mob.attr({ x: (mob.grid_x+1) * game.TILE_WIDTH-(0.75*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
+				  	}, 30); 
+				mob.attr({ x: (mob.grid_x+1) * game.TILE_WIDTH-(0.5*game.TILE_WIDTH) , y: mob.grid_y * game.TILE_HEIGHT });
+			  	}, 30); 
+
+			} else if (movement.y > 0) {
+				if (this.isPlayer) { mob.animate('PlayerMovingDown', animation_speed, 1); }
+
+				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y-1) * game.TILE_HEIGHT+(0.25*game.TILE_HEIGHT) });
+				setTimeout(function() {
+					setTimeout(function() {
+						setTimeout(function() {
+							mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+					  	}, 30); 
+						mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y-1) * game.TILE_HEIGHT+(0.75*game.TILE_HEIGHT) });
+				  	}, 30); 
+				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y-1) * game.TILE_HEIGHT+(0.5*game.TILE_HEIGHT) });
+			  	}, 30); 
+			} else if (movement.y < 0) {
+				if (this.isPlayer) { mob.animate('PlayerMovingUp', animation_speed, 1); }
+
+				mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.25*game.TILE_HEIGHT) });
+				setTimeout(function() {
+					setTimeout(function() {
+						setTimeout(function() {
+							mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+					  	}, 30); 
+						mob.attr({ x: mob.grid_x * game.TILE_WIDTH , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.75*game.TILE_HEIGHT) });
+				  	}, 30); 
+				mob.attr({ x: mob.grid_x * game.TILE_WIDTH , y: (mob.grid_y+1) * game.TILE_HEIGHT-(0.5*game.TILE_HEIGHT) });
+			  	}, 30); 
+			}
+		} else {
+			mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+		}
 		// 	mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
 		// }
+		setTimeout(function() {
 			mob.attr({ x: mob.grid_x * game.TILE_WIDTH, y: mob.grid_y * game.TILE_HEIGHT });
+	  	}, 90); 
+
 	},
 
 });
