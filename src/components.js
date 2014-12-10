@@ -171,81 +171,81 @@ Crafty.c('Mob', {
 
 				// calculate Mob movement
 				var movement = {x:0, y:0};
+				var moveArr = game.calculateDistanceArray(evt.player_x, evt.player_y, this.grid_x, this.grid_y);
 
-				// if 	(Math.abs(this.grid_x-evt.player_x) >= Math.abs(this.grid_y-evt.player_y)) {
-				if ((this.grid_x<evt.player_x)) {
-					movement.x = 1;
-				} else if ((this.grid_x>evt.player_x)){
-					movement.x = -1;
-				}	
-				 
-				if ((this.grid_y<evt.player_y)) {
-					movement.y = 1;
-				} else if ((this.grid_y>evt.player_y)){
-					movement.y = -1;
-				}
-				
-				if (!this.performMobMove(movement)) {
+				for (var i = 0; i <= moveArr.length - 1 ; i++) {
+					console.log("movingcheck "+i);
+					if (moveArr[i].x > this.grid_x) { movement.x = 1};
+					if (moveArr[i].x < this.grid_x) { movement.x = -1};
+					if (moveArr[i].y > this.grid_y) { movement.y = 1};
+					if (moveArr[i].y < this.grid_y) { movement.y = -1};
+					// {x: moveArr[i].x, y: moveArr[i].y}
+					if (this.performMobMove(movement)) { 
+						console.log("moving to: "+movement.x+" "+movement.y);
+						break;
+					}
 					movement = {x:0, y:0};
-					if (evt.player_y == this.grid_y) {
-						if (evt.player_x < this.grid_x) {
-							movement.x = -1;
-							if (game.GRID[this.grid_x-1][this.grid_y-1] != 'undefined') { movement.y = -1 };
-							if (game.GRID[this.grid_x-1][this.grid_y+1] != 'undefined') { movement.y = +1 };
-						}
-						if (evt.player_x > this.grid_x) {
-							movement.x = 1;
-							if (game.GRID[this.grid_x+1][this.grid_y-1] != 'undefined') { movement.y = -1 };
-							if (game.GRID[this.grid_x+1][this.grid_y+1] != 'undefined') { movement.y = +1 };
-						}
-					} else if (evt.player_x == this.grid_x){
-						if (evt.player_y < this.grid_y) {
-							movement.y = -1;
-							if (game.GRID[this.grid_x-1][this.grid_y-1] != 'undefined') { movement.x = -1 };
-							if (game.GRID[this.grid_x+1][this.grid_y-1] != 'undefined') { movement.x = +1 };
-						}
-						if (evt.player_y > this.grid_y) {
-							movement.y = 1;
-							if (game.GRID[this.grid_x-1][this.grid_y+1] != 'undefined') { movement.x = -1 };
-							if (game.GRID[this.grid_x+1][this.grid_y+1] != 'undefined') { movement.x = +1 };
-						}
+				};
 
-					}
-
-					if (!this.performMobMove(movement)) {
-						movement = {x:0, y:0};
-						if (evt.player_x > this.grid_x) { 
-							movement.x = 1;
-						} else if (evt.player_x < this.grid_x) {
-							movement.x = -1;
-							// TODO: player right of stone, mob above player, player moves under stone, mob moves above stone!
-						} else if (evt.player_y < this.grid_y) {
-							movement.y = -1;
-						} else if (evt.player_y > this.grid_y) {
-							movement.y = 1;
-						}
-						this.performMobMove(movement);
-
-						// if (evt.player_x > this.grid_x) {
-						// 	if (evt.player_y > this.grid_y) {
-						// 		if (Math.abs(this.grid_x-evt.player_x) >= Math.abs(this.grid_y-evt.player_y)) { 
-						// 			movement.x = 1;
-						// 		} else {
-						// 			movement.y = 1;
-						// 		}
-						// 	}
-						// }
-					}
-				// 	movement.x = 0;
-				// 	movement.y = 0;
-				// 	if ((this.grid_y<evt.player_y)) {
-				// 		movement.y = 1;
-				// 	} else {
-				// 		movement.y = -1;
-				}	
-				// this.performMobMove(movement);
+				//
+				// this is the old malfunctioning mob movement
+				//
+				// if 	(Math.abs(this.grid_x-evt.player_x) >= Math.abs(this.grid_y-evt.player_y)) {
+				// if ((this.grid_x<evt.player_x)) {
+				// 	movement.x = 1;
+				// } else if ((this.grid_x>evt.player_x)){
+				// 	movement.x = -1;
+				// }	
+				 
+				// if ((this.grid_y<evt.player_y)) {
+				// 	movement.y = 1;
+				// } else if ((this.grid_y>evt.player_y)){
+				// 	movement.y = -1;
+				// }
 				
-			    // Crafty.e('FloatingText').FloatingText(this.x+8, this.y-14, '!', '#BBBB00', 100, {w:32, h:32}, "20px");
+				// if (!this.performMobMove(movement)) {
+				// 	movement = {x:0, y:0};
+				// 	if (evt.player_y == this.grid_y) {
+				// 		if (evt.player_x < this.grid_x) {
+				// 			movement.x = -1;
+				// 			if (game.GRID[this.grid_x-1][this.grid_y-1] != 'undefined') { movement.y = -1 };
+				// 			if (game.GRID[this.grid_x-1][this.grid_y+1] != 'undefined') { movement.y = +1 };
+				// 		}
+				// 		if (evt.player_x > this.grid_x) {
+				// 			movement.x = 1;
+				// 			if (game.GRID[this.grid_x+1][this.grid_y-1] != 'undefined') { movement.y = -1 };
+				// 			if (game.GRID[this.grid_x+1][this.grid_y+1] != 'undefined') { movement.y = +1 };
+				// 		}
+				// 	} else if (evt.player_x == this.grid_x){
+				// 		if (evt.player_y < this.grid_y) {
+				// 			movement.y = -1;
+				// 			if (game.GRID[this.grid_x-1][this.grid_y-1] != 'undefined') { movement.x = -1 };
+				// 			if (game.GRID[this.grid_x+1][this.grid_y-1] != 'undefined') { movement.x = +1 };
+				// 		}
+				// 		if (evt.player_y > this.grid_y) {
+				// 			movement.y = 1;
+				// 			if (game.GRID[this.grid_x-1][this.grid_y+1] != 'undefined') { movement.x = -1 };
+				// 			if (game.GRID[this.grid_x+1][this.grid_y+1] != 'undefined') { movement.x = +1 };
+				// 		}
+
+				// 	}
+
+				// 	if (!this.performMobMove(movement)) {
+				// 		movement = {x:0, y:0};
+				// 		if (evt.player_x > this.grid_x) { 
+				// 			movement.x = 1;
+				// 		} else if (evt.player_x < this.grid_x) {
+				// 			movement.x = -1;
+				// 			// TODO: player right of stone, mob above player, player moves under stone, mob moves above stone!
+				// 		} else if (evt.player_y < this.grid_y) {
+				// 			movement.y = -1;
+				// 		} else if (evt.player_y > this.grid_y) {
+				// 			movement.y = 1;
+				// 		}
+				// 		this.performMobMove(movement);
+				// 	}
+
+				// }	
 			}
 	
 		});

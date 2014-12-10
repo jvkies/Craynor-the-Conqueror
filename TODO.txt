@@ -1,6 +1,5 @@
 TODO
 
-o implement smarter wayfinding (pythagoras)
 o implement smarter wayfinding (A star algorithm)
 o implement fog of war
 o replace citys to capture by keys, and than make a scene change when all keys are collected and a door to the scene change field is unlocked
