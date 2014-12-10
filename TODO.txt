@@ -1,0 +1,13 @@
+TODO
+
+o implement smarter wayfinding (pythagoras)
+o implement smarter wayfinding (A star algorithm)
+o implement fog of war
+o replace citys to capture by keys, and than make a scene change when all keys are collected and a door to the scene change field is unlocked
+o implement more unique items
+o balance the item drop rate with the spawn rate of mobs (changes with difficulty) to 1 or less items per level
+
+TOFIX
+
+o Volume 0 is actually volume 10 (crafty.audio handles volume 0 wrong)
+o Volume only affects music volume during scene change (its because we cannot change the volume of a currently playing song)

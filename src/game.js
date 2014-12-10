@@ -27,6 +27,46 @@ var game = {
 		sfxImage: {},
 		musicImage: {},
 		},
+
+	CHARLEVELS: [
+		{ level: 0, xp_treshold: 0, max_health: 5, max_mana: 0 },
+		{ level: 1, xp_treshold: 10, max_health: 20, max_mana: 0 },
+		{ level: 2, xp_treshold: 30, max_health: 25, max_mana: 10 },
+		{ level: 3, xp_treshold: 70, max_health: 30, max_mana: 20 },
+		{ level: 4, xp_treshold: 150, max_health: 35, max_mana: 30 },
+		{ level: 5, xp_treshold: 310, max_health: 40, max_mana: 40 },
+		{ level: 6, xp_treshold: 630, max_health: 45, max_mana: 50 },
+		{ level: 7, xp_treshold: 1270, max_health: 50, max_mana: 60 },
+		{ level: 8, xp_treshold: 2550, max_health: 55, max_mana: 70 },
+		{ level: 9, xp_treshold: 5110, max_health: 60, max_mana: 80 },
+		{ level: 10, xp_treshold: 10230, max_health: 65, max_mana: 90 },
+		{ level: 11, xp_treshold: 20470, max_health: 70, max_mana: 100 },
+		{ level: 12, xp_treshold: 40950, max_health: 75, max_mana: 120 },
+		{ level: 13, xp_treshold: 81910, max_health: 80, max_mana: 125 },
+		{ level: 14, xp_treshold: 163830, max_health: 85, max_mana: 130 },
+		{ level: 15, xp_treshold: 327670, max_health: 90, max_mana: 135 },
+		{ level: 16, xp_treshold: 655350, max_health: 95, max_mana: 140 },
+		{ level: 17, xp_treshold: 1310710, max_health: 100, max_mana: 145 },
+	],
+
+	ENEMY: {
+		DemonLord: { maxHealth: 10, maxMana: 5, dmg: 2, def: 0, xp: 1, aggroRange: 3, speed: 1, },
+		DemonLordBlue: { maxHealth: 25, maxMana: 25, dmg: 4, def: 3, xp: 5, aggroRange: 2, speed: 1 },
+		DemonLordYellow: { maxHealth: 50, maxMana: 50, dmg: 6, def: 6, xp: 20, aggroRange: 2, speed: 2 },
+		DemonLordBlack: { maxHealth: 100, maxMana: 100, dmg: 15, def: 10, xp: 100, aggroRange: 2, speed: 1 },
+		DemonPrince: { maxHealth: 100, maxMana: 100, dmg: 15, def: 10, xp: 100, aggroRange: 2, speed: 1, loot: 'RingOfRegeneration'},
+		Wolf: { maxHealth: 20, maxMana: 20, dmg: 20, def: 0, xp: 20, aggroRange: 4, speed: 1 },
+	},
+
+	ITEMS: {
+		RingOfRegeneration: false,
+	},
+
+	PLAYER: false, // player not initialized
+
+	// Statistical data
+	MOBS_KILLED: 0,
+	DMG_DEALT: 0,
 	
 	MENU: {
 		isDrawn: false,
@@ -100,41 +140,6 @@ var game = {
 		},
 		],
 	},
-
-	CHARLEVELS: [
-		{ level: 0, xp_treshold: 0, max_health: 5, max_mana: 0 },
-		{ level: 1, xp_treshold: 10, max_health: 20, max_mana: 0 },
-		{ level: 2, xp_treshold: 30, max_health: 25, max_mana: 10 },
-		{ level: 3, xp_treshold: 70, max_health: 30, max_mana: 20 },
-		{ level: 4, xp_treshold: 150, max_health: 35, max_mana: 30 },
-		{ level: 5, xp_treshold: 310, max_health: 40, max_mana: 40 },
-		{ level: 6, xp_treshold: 630, max_health: 45, max_mana: 50 },
-		{ level: 7, xp_treshold: 1270, max_health: 50, max_mana: 60 },
-		{ level: 8, xp_treshold: 2550, max_health: 55, max_mana: 70 },
-		{ level: 9, xp_treshold: 5110, max_health: 60, max_mana: 80 },
-		{ level: 10, xp_treshold: 10230, max_health: 65, max_mana: 90 },
-		{ level: 11, xp_treshold: 20470, max_health: 70, max_mana: 100 },
-		{ level: 12, xp_treshold: 40950, max_health: 75, max_mana: 120 },
-		{ level: 13, xp_treshold: 81910, max_health: 80, max_mana: 125 },
-		{ level: 14, xp_treshold: 163830, max_health: 85, max_mana: 130 },
-		{ level: 15, xp_treshold: 327670, max_health: 90, max_mana: 135 },
-		{ level: 16, xp_treshold: 655350, max_health: 95, max_mana: 140 },
-		{ level: 17, xp_treshold: 1310710, max_health: 100, max_mana: 145 },
-	],
-
-	ENEMY: {
-		DemonLord: { maxHealth: 10, maxMana: 5, dmg: 2, def: 0, xp: 1, aggroRange: 3, speed: 1 },
-		DemonLordBlue: { maxHealth: 25, maxMana: 25, dmg: 4, def: 3, xp: 5, aggroRange: 2, speed: 1 },
-		DemonLordYellow: { maxHealth: 50, maxMana: 50, dmg: 6, def: 6, xp: 20, aggroRange: 2, speed: 2 },
-		DemonLordBlack: { maxHealth: 100, maxMana: 100, dmg: 15, def: 10, xp: 100, aggroRange: 2, speed: 1 },
-		Wolf: { maxHealth: 20, maxMana: 20, dmg: 15, def: 0, xp: 20, aggroRange: 4, speed: 1 },
-	},
-
-	PLAYER: false, // player not initialized
-
-	// Statistical data
-	MOBS_KILLED: 0,
-	DMG_DEALT: 0,
 
 	// The total width of the game screen. 
 	width: function() { return this.TILE_WIDTH * this.GRID_WIDTH; },
@@ -252,6 +257,8 @@ var game = {
 		// If the Menu is NOT on the screen, isDrawn is false and so the Menu will be DRAWN on the screen
 		if(game.MENU.isDrawn == false)
 		{
+			if (game.SETTINGS.isSFXOn) { Crafty.audio.play('interface_open',1,game.SETTINGS.volume/10); }
+
 			// background
 			game.MENU.Background = Crafty.e('2D, DOM').css({'background':'rgb(12,49,19)', 'border': '4px solid rgb(6, 25, 10)'}).attr({ x: 150, y: 100, w: 550, h: 480});
 			// 1. Column
@@ -280,6 +287,8 @@ var game = {
 		// If the Menu IS on the screen, isDrawn is true and so the Menu will be DESTROYED
 		else
 		{
+			if (game.SETTINGS.isSFXOn) { Crafty.audio.play('interface_close',1,game.SETTINGS.volume/10); }
+
 			// Background
 			game.MENU.Background.destroy();
 			// 1. Column
@@ -305,6 +314,8 @@ var game = {
 	// Marks Menu Elements as active, game.MENU.index indicates the active Element
 	manageMenu: function () {
 		
+		if (game.SETTINGS.isSFXOn) { Crafty.audio.play('interface_select',1,game.SETTINGS.volume/10); }
+
 		var keys = Object.keys(game.MENU.Elements);	
 		var length = Object.keys(game.MENU.Elements).length-1;
 		if(arguments[0] == "DOWN_ARROW")
@@ -396,6 +407,7 @@ var game = {
 			$('#charHPValue').text(game.PLAYER.health);
 			$('#charCurrentHP').css("height", game.PLAYER.health/game.PLAYER.maxHealth*100+"%");
 			$('#charCurrentXP').css("height", ((game.PLAYER.curr_xp-game.CHARLEVELS[game.PLAYER.level-1].xp_treshold)/(game.CHARLEVELS[game.PLAYER.level].xp_treshold-game.CHARLEVELS[game.PLAYER.level-1].xp_treshold))*100+"%");
+			if (game.ITEMS.RingOfRegeneration) { $('#charItemsRingOfReg').show(); };
 
 		}
 	},

@@ -45,6 +45,7 @@ Crafty.c('Enemy', {
   },
   Enemy: function (type, grid_x, grid_y) {
 	// console.log(game.ENEMY[type]);
+	this.type = type;
 	this.maxHealth = game.ENEMY[type].maxHealth;
 	this.health = game.ENEMY[type].maxHealth;
 	this.maxMana = game.ENEMY[type].maxMana;
@@ -84,6 +85,12 @@ Crafty.c('loot_armor_1', {
   },
 });
 
+Crafty.c('RingOfRegeneration', {
+  init: function() {
+    this.requires('Actor, Image')
+    	.image('assets/images/ringofreg.png');
+  },
+});
 
 Crafty.c('SlashEffect', {
 	init: function() {
@@ -132,6 +139,7 @@ Crafty.c('FloatingText', {
 });
 
 Crafty.c('Mob', {
+	type: "DemonLord",
 	health: 10,
 	maxHealth: 10,
 	mana: 5,
@@ -296,12 +304,19 @@ Crafty.c('Mob', {
 		    } else {
 				game.DMG_DEALT += dmgTaken;
 				if (fighters.victim.health <= 0) {
+					// Monster killed
+					var loot_type = false;
+
+					if (typeof game.ENEMY[game.GRID[fighters.victim.grid_x][fighters.victim.grid_y].type].loot != 'undefined') {
+						loot_type = game.ENEMY[game.GRID[fighters.victim.grid_x][fighters.victim.grid_y].type].loot;
+					} else if (Math.random() < (0.095-(0.015*game.SETTINGS.difficulty))) {
+						var loot_type = (Math.random() < 0.8) ? 'loot_sword_1' : 'loot_armor_1';
+					}
 					game.MOBS_KILLED += 1;
 					fighters.victim.destroy();
 					game.GRID[fighters.victim.grid_x][fighters.victim.grid_y] = undefined;
-					if (Math.random() < 0.08) {
+					if (loot_type) {
 						// yay loot!
-						var loot_type = (Math.random() < 0.8) ? 'loot_sword_1' : 'loot_armor_1';
 						game.GRID[fighters.victim.grid_x][fighters.victim.grid_y] = Crafty.e(loot_type).at(fighters.victim.grid_x,fighters.victim.grid_y);
 					}
 					this.giveXP(fighters.attacker, fighters.victim.XP);
@@ -312,7 +327,7 @@ Crafty.c('Mob', {
 		    }
 		}
 
-	    if (game.SETTINGS.isSFXOn) { Crafty.audio.play(hitSound); }
+	    if (game.SETTINGS.isSFXOn) { Crafty.audio.play(hitSound,1,game.SETTINGS.volume/10); }
 
 	    // Crafty.e('FloatingText').FloatingText(fighters.attacker.x+8, fighters.attacker.y-4, dmgTaken.toString(), '#562807', 25, {w:32, h:32}, "20px");
 
@@ -406,7 +421,7 @@ Crafty.c('Mob', {
 			$('#charHPValue').text(whom.maxHealth);
 			$('#charCurrentXP').css("height", "0%");
 			console.log("level up");
-			if (game.SETTINGS.isSFXOn) { Crafty.audio.play('levelup'); }
+			if (game.SETTINGS.isSFXOn) { Crafty.audio.play('levelup',1,game.SETTINGS.volume/10); }
 		};
 	},
 
@@ -632,23 +647,28 @@ Crafty.c('PlayerCharacter', {
 
 	performMove: function(movement) {
 		var regeneration = 0.5;
+		if (game.ITEMS.RingOfRegeneration) { regeneration += 1 };
 		if (typeof game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] == 'undefined' || // move to a place, if its either empty or no solid
 			game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].__c.Solid != true) { 
 			if (typeof game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] != 'undefined') {
 				if (game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].__c.loot_sword_1 == true) {
 					game.PLAYER.dmg += 1;
 					$('#charDmg').text(game.PLAYER.dmg);
-					console.log('found sword');
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].destroy();
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] = undefined;
-				    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('loot_sword'); }
+				    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('loot_sword',1,game.SETTINGS.volume/10); }
 				} else if (game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].__c.loot_armor_1 == true) {
 					game.PLAYER.def += 1;
 					$('#charDef').text(game.PLAYER.def);
-					console.log('found armor');
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].destroy();
 					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] = undefined;
-				    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('loot_armor'); }
+				    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('loot_armor',1,game.SETTINGS.volume/10); }
+				} else if (game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].__c.RingOfRegeneration == true) {
+					console.log('found ring of regeneration');
+					$('#charItemsRingOfReg').show();
+					game.ITEMS.RingOfRegeneration = true;
+					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y].destroy();
+					game.GRID[this.grid_x+movement.x][this.grid_y+movement.y] = undefined;
 				}
 			}
 			this.moveMob(movement);
@@ -659,6 +679,7 @@ Crafty.c('PlayerCharacter', {
 		} 
 		if (game.PLAYER.health < game.PLAYER.maxHealth) {
 			game.PLAYER.health += regeneration;
+			if (game.PLAYER.health > game.PLAYER.maxHealth) { game.PLAYER.health = game.PLAYER.maxHealth; }
 			$('#charCurrentHP').css("height", game.PLAYER.health/game.PLAYER.maxHealth*100+"%");
 			$('#charHPValue').text(game.PLAYER.health);
 		}
@@ -685,7 +706,7 @@ Crafty.c('Village', {
   // Process a visitation with this village
   visit: function() {
     this.destroy();
-    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('destruction'); }
+    if (game.SETTINGS.isSFXOn) { Crafty.audio.play('destruction',1,game.SETTINGS.volume/10); }
     Crafty.trigger('VillageVisited', this);
   }
 });

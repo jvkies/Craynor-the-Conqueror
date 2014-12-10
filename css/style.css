@@ -103,4 +103,28 @@ body, html { margin: 0; padding: 0; font-size: 24px; font-family: 'yoster', Helv
 	top: 13px;
 }
 
+#charItems {
+	color: rgb(157,157,157);
+	position: absolute;
+	left: 303px;
+	top: 4px;
+	font-size: 22px
+}
+
+#charItemsRingOfReg {
+	position: absolute;
+	left: 303px;
+	top: 25px;
+	background: url(../assets/images/ringofreg.png);
+	width: 32px;
+	height: 32px;
+	display: none;
+}
+
+
+
+
+
+
+
 

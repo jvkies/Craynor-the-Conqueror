@@ -10,7 +10,7 @@ Crafty.scene('Game', function() {
 	game.initialiseMenuListener();
 	var stagelevel = Crafty.e('2D, DOM, Text, Color').text("Stage: "+game.GAMELEVEL).textColor('#9D9D9D').attr({ x: 748, y: 29, w: 200}).css({'family': game.GAME_FONT, 'font-size':'20px'});
 
-	if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
+	if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage',-1,game.SETTINGS.volume/10); }
 
 	var stage_taser = Crafty.e('2D, DOM, Text, Color, Tween').text("Stage: "+game.GAMELEVEL).textColor('#5A1E00').attr({ x: (game.TILE_WIDTH*game.GRID_WIDTH)/2-100, y: game.TILE_HEIGHT*game.GRID_HEIGHT/2, w: 250, alpha: 0}).css({'family': "Impact", 'font-size':'40px'});
 	stage_taser.tween({ alpha: 1}, 20);
@@ -40,14 +40,15 @@ Crafty.scene('Game', function() {
 				var bush_or_rock = (Math.random() > 0.3) ? 'Bush' : 'Rock';
 				game.GRID[x][y] = Crafty.e(bush_or_rock).at(x, y);
 			// } else if (Math.random() < (0.03+(game.PLAYER.level/100*0.4)) && typeof game.GRID[x][y] == 'undefined' && y !< 7 || x !< 5) {
-			} else if (Math.random() < (0.03+(game.PLAYER.level/100*0.4)) && typeof game.GRID[x][y] == 'undefined') {
+			} else if (Math.random() < (0.03+(game.PLAYER.level/100*(0.4*game.SETTINGS.difficulty))) && typeof game.GRID[x][y] == 'undefined') {
 				if (y >= 7 || x >= 5) {
+					// spawning monster
 					// var enemy_type = (Math.random() > (0.1+(game.PLAYER.level/100*5.5)) ) ? 'DemonLord' : 'DemonLordBlue';
 					var enemy_type = 'DemonLord';
-					if (game.GAMELEVEL >= 2 && (Math.random() < (game.PLAYER.level/100*7))) { enemy_type = 'DemonLordBlue'; }
-					if (game.GAMELEVEL >= 7 && (Math.random() < (game.PLAYER.level/100*3.5))) { enemy_type = 'DemonLordYellow'; }
-					if (game.GAMELEVEL >= 12 && (Math.random() < (game.PLAYER.level/100*1.0))) { enemy_type = 'Wolf'; }
-					if (game.GAMELEVEL >= 17 && (Math.random() < (game.PLAYER.level/100*1.0))) { enemy_type = 'DemonLordBlack'; }
+					if (game.GAMELEVEL >= 2 && (Math.random() < (game.PLAYER.level/100*(6+game.SETTINGS.difficulty)))) { enemy_type = 'DemonLordBlue'; }
+					if (game.GAMELEVEL >= 7 && (Math.random() < (game.PLAYER.level/100*(2.5+game.SETTINGS.difficulty)))) { enemy_type = 'DemonLordYellow'; }
+					if (game.GAMELEVEL >= 12 && (Math.random() < (game.PLAYER.level/100*game.SETTINGS.difficulty))) { enemy_type = 'Wolf'; }
+					if (game.GAMELEVEL >= 17 && (Math.random() < (game.PLAYER.level/100*game.SETTINGS.difficulty))) { enemy_type = 'DemonLordBlack'; }
 	// game.GRID[10][10] = Crafty.e('Enemy, Wolf').Enemy('Wolf',10,10);
 					game.GRID[x][y] = Crafty.e('Enemy, '+enemy_type).Enemy(enemy_type,x,y);
 				}
@@ -70,7 +71,7 @@ Crafty.scene('Game', function() {
 	// Make exit
 	// game.clear_area({x: game.GRID_WIDTH-2, y: 10}, {x: game.GRID_WIDTH-1, y: 11})
 
-	// Make Black Demon
+	// Make DemonPrince
 	if (game.GAMELEVEL == 15) {
 		var bDemon_pos = {x: (game.GRID_WIDTH/2), y: 11 }
 		game.clear_area({x: bDemon_pos.x-2, y: bDemon_pos.y-3}, {x: bDemon_pos.x+3, y: bDemon_pos.y+2})
@@ -86,14 +87,14 @@ Crafty.scene('Game', function() {
 		}
 		// game.GRID[x][y] = Crafty.e('Tree').at(bDemon_pos.x, bDemon_pos.y);
 		// game.GRID[x][y] = Crafty.e('Tree').at(bDemon_pos.x, bDemon_pos.y+2);
-		game.GRID[bDemon_pos.x][bDemon_pos.y-1] = Crafty.e('Enemy, DemonLordBlack').Enemy('DemonLordBlack',bDemon_pos.x,bDemon_pos.y-1);
+		game.GRID[bDemon_pos.x][bDemon_pos.y-1] = Crafty.e('Enemy, DemonPrince').Enemy('DemonPrince',bDemon_pos.x,bDemon_pos.y-1);
 		game.clear_area({x: bDemon_pos.x, y:bDemon_pos.y+1}, {x: bDemon_pos.x, y:bDemon_pos.y+2}, true);
 	}
 	// game.GRID[10][10] = Crafty.e('Enemy, Wolf').Enemy('Wolf',10,10);
 
 
   // Play a ringing sound to indicate the start of the journey
-  if (game.SETTINGS.isSFXOn) { Crafty.audio.play('newgame'); }
+  if (game.SETTINGS.isSFXOn) { Crafty.audio.play('newgame',1,game.SETTINGS.volume/10); }
 
   // Show the victory screen once all villages are visisted
   this.show_victory = this.bind('VillageVisited', function() {
@@ -129,7 +130,7 @@ Crafty.scene('Game', function() {
 // Tells the player when they've won and lets them start a new game
 Crafty.scene('GameOver', function() {
 	// Display some text in celebration of the victory
-	if (game.SETTINGS.isSFXOn) { Crafty.audio.play('gameover'); }
+	if (game.SETTINGS.isSFXOn) { Crafty.audio.play('gameover',1,game.SETTINGS.volume/10); }
 	Crafty.audio.stop('thevillage');
 
 	for (var x = 0; x < game.GRID_WIDTH; x++) {
@@ -170,10 +171,12 @@ Crafty.scene('GameOver', function() {
 	game.DMG_DEALT = 0;
 	game.GAMELEVEL = 0;
 
+	game.ITEMS.RingOfRegeneration = false;
+
 	this.restart_game = Crafty.bind('KeyDown', function() {
 		if (!delay) {
 			Crafty.scene('Game');
-			if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
+			if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage',-1,game.SETTINGS.volume/10); }
 	    }
 	});
 }, function() {
@@ -207,7 +210,7 @@ Crafty.scene('Victory', function() {
 		// .css({'font-size':'45px'});
  
 	// Give'em a round of applause!
-	if (game.SETTINGS.isSFXOn) { Crafty.audio.play('winning'); }
+	if (game.SETTINGS.isSFXOn) { Crafty.audio.play('winning',1,game.SETTINGS.volume/10); }
  
 	// After a short delay, watch for the player to press a key, then restart
 	// the game when a key is pressed
@@ -223,7 +226,7 @@ Crafty.scene('Victory', function() {
 	this.restart_game = Crafty.bind('KeyDown', function() {
 		if (!delay) {
 			Crafty.scene('Game');
-			if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
+			if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage',-1,game.SETTINGS.volume/10); }
 	    }
 	});
 }, function() {
@@ -267,6 +270,7 @@ Crafty.scene('Loading', function(){
     'assets/images/32x32_enemy_yellow_4.png',
     'assets/images/32x32_enemy_black.png',
     'assets/images/32x32_wolf.gif',
+    'assets/images/ringofreg.png',
     'assets/32x32_hunter.png',
     'assets/32x32_forest.gif',
 
@@ -288,6 +292,9 @@ Crafty.scene('Loading', function(){
     'assets/sfx/pain5.wav',
     'assets/sfx/death.wav',
     'assets/sfx/gameover.wav',
+    'assets/sfx/interface_close.wav',
+    'assets/sfx/interface_open.wav',
+    'assets/sfx/interface_select.wav',
     'assets/sfx/levelup.wav'
     ], function(){
     // Once the images are loaded...
@@ -335,6 +342,7 @@ Crafty.scene('Loading', function(){
 
     Crafty.sprite(32, 'assets/images/32x32_enemy_black.png', {
       DemonLordBlack:  [0, 0],
+      DemonPrince:  [0, 0],
     }, 0, 2);
 
     Crafty.sprite(32, 'assets/images/slash_001_red.png', {
@@ -345,27 +353,34 @@ Crafty.scene('Loading', function(){
       Wolf:  [0, 0],
     }, 0, 0);
 
+    Crafty.sprite(32, 'assets/images/ringofreg.png', {
+      ringofreg:  [0, 0],
+    }, 0, 0);
+
     // Define our sounds for later use
     Crafty.audio.add({
-      destruction: 	['assets/destruction.wav'],
-      winning: 		['assets/winning.wav'],
-      newgame: 		['assets/newgame.wav'],
-      thevillage: 	['assets/TheVillageMSX.mp3'],
-      ring: 		['assets/candy_dish_lid.mp3',
-                	'assets/candy_dish_lid.ogg',
-            	    'assets/candy_dish_lid.aac'],
-      swing1: 		['assets/sfx/swing1.wav'],
-      swing2: 		['assets/sfx/swing2.wav'],
-      swing3: 		['assets/sfx/swing3.wav'],
-      loot_sword:	['assets/sfx/sword_sheath.mp3'],
-      loot_armor:	['assets/sfx/chainmail2.wav'],
-      nohit:		['assets/sfx/nohit.wav'],
-      pain1:		['assets/sfx/pain1.wav'],
-      pain2:		['assets/sfx/pain2.wav'],
-      pain5:		['assets/sfx/pain5.wav'],
-      death:		['assets/sfx/death.wav'],
-      gameover:		['assets/sfx/gameover.wav'],
-      levelup: 		['assets/sfx/levelup.wav']
+      destruction: 		['assets/destruction.wav'],
+      winning: 			['assets/winning.wav'],
+      newgame: 			['assets/newgame.wav'],
+      thevillage: 		['assets/TheVillageMSX.mp3'],
+      ring: 			['assets/candy_dish_lid.mp3',
+                		'assets/candy_dish_lid.ogg',
+            	    	'assets/candy_dish_lid.aac'],
+      swing1: 			['assets/sfx/swing1.wav'],
+      swing2: 			['assets/sfx/swing2.wav'],
+      swing3: 			['assets/sfx/swing3.wav'],
+      loot_sword:		['assets/sfx/sword_sheath.mp3'],
+      loot_armor:		['assets/sfx/chainmail2.wav'],
+      nohit:			['assets/sfx/nohit.wav'],
+      pain1:			['assets/sfx/pain1.wav'],
+      pain2:			['assets/sfx/pain2.wav'],
+      pain5:			['assets/sfx/pain5.wav'],
+      death:			['assets/sfx/death.wav'],
+      gameover:			['assets/sfx/gameover.wav'],
+      interface_close:	['assets/sfx/interface_close.wav'],
+      interface_open:	['assets/sfx/interface_open.wav'],
+      interface_select:	['assets/sfx/interface_select.wav'],
+      levelup: 			['assets/sfx/levelup.wav']
     });
  
     // Now that our sprites are ready to draw, start the game
@@ -381,7 +396,7 @@ Crafty.scene('Loading', function(){
 
 	this.restart_game = Crafty.bind('KeyDown', function() {
 		Crafty.scene('Game');
-		if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage'); }
+		if (game.SETTINGS.isMusicOn) { Crafty.audio.play('thevillage',-1,game.SETTINGS.volume/10); }
 
 
   });
